@@ -307,8 +307,9 @@ public class SysUserServiceImpl implements ISysUserService {
    */
   @Override
   public int resetUserPwd(String userName, String password) {
-      if (SecurityUtils.isSuperAdmin() || SecurityUtils.isSuperAdmin()) {
-          throw new CustomException("无权重置密码");
+      SysUser targetUser = userMapper.selectUserByUserName(userName);
+      if (StringUtils.isNotNull(targetUser) && (SecurityUtils.isSuperAdmin(targetUser) || SecurityUtils.isComAdmin(targetUser))) {
+          throw new CustomException("无权重置管理员密码");
       }
     return userMapper.resetUserPwd(userName, password);
   }
@@ -364,6 +365,7 @@ public class SysUserServiceImpl implements ISysUserService {
    * @return 结果
    */
   @Override
+  @Transactional
   public int deleteUserById(Long userId) {
     // 删除用户与角色关联
     userRoleMapper.deleteUserRoleByUserId(userId);
@@ -379,13 +381,17 @@ public class SysUserServiceImpl implements ISysUserService {
    * @return 结果
    */
   @Override
+  @Transactional
   public int deleteUserByIds(Long[] userIds) {
     for (Long userId : userIds) {
       SysUser sysUser = userMapper.selectUserById(userId);
       if (SecurityUtils.isSuperAdmin(sysUser) || SecurityUtils.isComAdmin(sysUser)) {
           throw new CustomException("不能删除管理员账号");
       }
-
+      // 删除用户与角色关联
+      userRoleMapper.deleteUserRoleByUserId(userId);
+      // 删除用户与岗位关联
+      userPostMapper.deleteUserPostByUserId(userId);
     }
     return userMapper.deleteUserByIds(userIds);
   }
