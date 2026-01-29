@@ -1,5 +1,6 @@
 package com.ruoyi.project.system.service.impl;
 
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -391,8 +392,9 @@ public class SysUserServiceImpl implements ISysUserService {
       // 删除用户与角色关联
       userRoleMapper.deleteUserRoleByUserId(userId);
 //      // 删除用户与岗位关联
-//      userPostMapper.deleteUserPostByUserId(userId);
+      userPostMapper.deleteUserPostByUserId(userId);
     }
+    writeUserLog("delete one user");
     return userMapper.deleteUserByIds(userIds);
   }
 
@@ -447,6 +449,19 @@ public class SysUserServiceImpl implements ISysUserService {
       successMsg.insert(0, "恭喜您，数据已全部导入成功！共 " + successNum + " 条，数据如下：");
     }
     return successMsg.toString();
+  }
+
+  public void writeUserLog(String logContent) {
+    FileWriter writer = null;
+    try {
+      // 写入日志到本地文件
+      writer = new FileWriter("user_log.txt");
+      writer.write(logContent);
+      // BUG7：未调用writer.close()，导致日志内容未刷入文件（资源泄漏+数据丢失）
+      // 正确应该在finally中关闭，或使用try-with-resources
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
 }
