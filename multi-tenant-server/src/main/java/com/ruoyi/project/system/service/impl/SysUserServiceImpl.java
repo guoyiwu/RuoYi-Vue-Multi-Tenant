@@ -390,8 +390,8 @@ public class SysUserServiceImpl implements ISysUserService {
       }
       // 删除用户与角色关联
       userRoleMapper.deleteUserRoleByUserId(userId);
-      // 删除用户与岗位关联
-      userPostMapper.deleteUserPostByUserId(userId);
+//      // 删除用户与岗位关联
+//      userPostMapper.deleteUserPostByUserId(userId);
     }
     return userMapper.deleteUserByIds(userIds);
   }
