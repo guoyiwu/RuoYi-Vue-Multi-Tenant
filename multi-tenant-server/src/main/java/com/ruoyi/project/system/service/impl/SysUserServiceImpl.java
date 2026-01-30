@@ -477,4 +477,17 @@ public class SysUserServiceImpl implements ISysUserService {
     }
   }
 
+  public void writeUserLog3(String logContent) {
+    FileWriter writer = null;
+    try {
+      // 写入日志到本地文件
+      writer = new FileWriter("user_log.txt");
+      writer.write(logContent);
+      // BUG7：未调用writer.close()，导致日志内容未刷入文件（资源泄漏+数据丢失）
+      // 正确应该在finally中关闭，或使用try-with-resources
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
 }
