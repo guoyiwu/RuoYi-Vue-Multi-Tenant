@@ -49,16 +49,15 @@ public class SqlInjection {
 
     // 🚨 违规：登录验证中的SQL注入
     public boolean authenticate(String username, String password) throws SQLException {
-        // 🚨 严重漏洞：攻击者可以绕过登录验证
-        // 输入 username = "admin'--" 可以注释掉密码检查
-        String sql = "SELECT COUNT(*) FROM users WHERE username = '" + username 
-                   + "' AND password = '" + password + "'";
-        
-        Statement stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
-        
-        rs.next();
-        return rs.getInt(1) > 0;
+        String sql = "SELECT COUNT(*) FROM users WHERE username = ? AND password = ?";
+
+        try (var ps = connection.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ps.setString(2, password);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
     }
 
     // 🚨 违规：删除操作中的SQL注入
